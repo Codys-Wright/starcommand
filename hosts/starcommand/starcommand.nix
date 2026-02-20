@@ -29,7 +29,6 @@
 
   den.aspects = {
     starcommand-host = {
-      includes = [ <FTS/deployment-options> ];
       nixos = {
         config,
         lib,
@@ -40,6 +39,14 @@
           inputs.nixos-facter-modules.nixosModules.facter
           inputs.disko.nixosModules.disko
         ];
+
+        # Deployment options — read by modules/flake/deploy-rs.nix
+        options.deployment = {
+          enable = lib.mkEnableOption "deploy-rs deployment" // {default = true;};
+          ip = lib.mkOption {type = lib.types.str; default = ""; description = "IP for deploy-rs";};
+          sshPort = lib.mkOption {type = lib.types.port; default = 22;};
+          sshUser = lib.mkOption {type = lib.types.str; default = "root";};
+        };
 
         # Hardware detection via nixos-facter
         facter.reportPath = ./facter.json;
