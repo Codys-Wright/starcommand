@@ -6,6 +6,7 @@
     import-tree.url = "github:vic/import-tree";
     den.url = "github:vic/den";
     selfhostblocks.url = "github:Codys-Wright/selfhostblocks";
+    systems.url = "github:nix-systems/default";
 
     # Pin nixpkgs to selfhostblocks' version — ensures patches apply cleanly
     nixpkgs.follows = "selfhostblocks/nixpkgs";
