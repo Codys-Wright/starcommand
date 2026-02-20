@@ -2,7 +2,6 @@
 {
   imports = [
     (inputs.flake-file.flakeModules.dendritic)
-    (inputs.den.flakeModules.dendritic)
   ];
 
   # Core framework inputs
@@ -13,9 +12,9 @@
   flake-file.inputs.systems.url = lib.mkDefault "github:nix-systems/default";
 
   # nixpkgs follows selfhostblocks — guarantees patches always apply
-  # mkForce needed to clear the default url that den/flake-file sets for nixpkgs
-  flake-file.inputs.nixpkgs.follows = lib.mkForce "selfhostblocks/nixpkgs";
-  flake-file.inputs.nixpkgs.url = lib.mkForce null;
+  # url must be cleared (empty string = skipped by inputsExpr) so follows is the only entry
+  flake-file.inputs.nixpkgs.url = lib.mkForce "";
+  flake-file.inputs.nixpkgs.follows = "selfhostblocks/nixpkgs";
   flake-file.inputs.nixpkgs-lib.follows = "nixpkgs";
 
   # Self-hosting

@@ -28,10 +28,7 @@
     };
     import-tree.url = "github:vic/import-tree";
     nixos-facter-modules.url = "github:numtide/nixos-facter-modules";
-    nixpkgs = {
-      follows = "selfhostblocks/nixpkgs";
-      url = "https://channels.nixos.org/nixpkgs-unstable/nixexprs.tar.xz";
-    };
+    nixpkgs.follows = "selfhostblocks/nixpkgs";
     nixpkgs-lib.follows = "nixpkgs";
     selfhostblocks.url = "github:Codys-Wright/selfhostblocks";
     sops-nix.url = "github:Mic92/sops-nix";
