@@ -1,0 +1,5 @@
+sops.key
+keys.txt
+.direnv/
+result
+result-*

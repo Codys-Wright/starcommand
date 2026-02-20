@@ -226,7 +226,7 @@
                 "immich_admin"
               ];
               passwordKey = "cody/personal/password";
-              passwordSopsFile = ../../users/cody/secrets.yaml;
+              passwordSopsFile = ../../users/starcommand/secrets.yaml;
             };
 
             amywright = {
@@ -652,7 +652,7 @@
         shb.sops.secret."cody/personal/password" = {
           request = config.shb.lldap.ensureUsers.codywright.password.request;
           settings = {
-            sopsFile = ../../users/cody/secrets.yaml;
+            sopsFile = ../../users/starcommand/secrets.yaml;
             key = "cody/personal/password";
           };
         };
