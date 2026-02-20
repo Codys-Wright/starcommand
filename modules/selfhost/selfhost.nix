@@ -628,7 +628,7 @@
 
         # SOPS configuration - points to starcommand user secrets
         sops = {
-          defaultSopsFile = lib.mkDefault ../../users/cody/secrets.yaml;
+          defaultSopsFile = lib.mkDefault ../../users/starcommand/secrets.yaml;
           # Use host's SSH key for decryption during build
           age.sshKeyPaths = ["/etc/ssh/ssh_host_ed25519_key"];
         };
