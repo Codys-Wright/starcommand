@@ -13,7 +13,9 @@
   flake-file.inputs.systems.url = lib.mkDefault "github:nix-systems/default";
 
   # nixpkgs follows selfhostblocks — guarantees patches always apply
-  flake-file.inputs.nixpkgs.follows = "selfhostblocks/nixpkgs";
+  # mkForce needed to clear the default url that den/flake-file sets for nixpkgs
+  flake-file.inputs.nixpkgs.follows = lib.mkForce "selfhostblocks/nixpkgs";
+  flake-file.inputs.nixpkgs.url = lib.mkForce null;
   flake-file.inputs.nixpkgs-lib.follows = "nixpkgs";
 
   # Self-hosting
