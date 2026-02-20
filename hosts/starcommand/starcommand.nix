@@ -29,6 +29,7 @@
 
   den.aspects = {
     starcommand-host = {
+      includes = [ <FTS/deployment-options> ];
       nixos = {
         config,
         lib,
