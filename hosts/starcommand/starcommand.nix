@@ -53,6 +53,12 @@
 
         nixpkgs.config.allowUnfree = true;
 
+        # SSH access
+        services.openssh = {
+          enable = true;
+          settings.PasswordAuthentication = false;
+        };
+
         # Hardware detection via nixos-facter
         facter.reportPath = ./facter.json;
 
