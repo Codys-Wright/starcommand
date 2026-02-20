@@ -51,6 +51,8 @@
 
         config = {
 
+        nixpkgs.config.allowUnfree = true;
+
         # Hardware detection via nixos-facter
         facter.reportPath = ./facter.json;
 

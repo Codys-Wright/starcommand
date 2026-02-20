@@ -44,7 +44,7 @@
         ldap = {
           enable = true;
           host = "127.0.0.1";
-          port = config.shb.ldap.ldapPort;
+          port = config.shb.lldap.ldapPort;
           inherit dcdomain;
           userGroup = "jellyfin_user";
           adminGroup = "jellyfin_admin";
