@@ -1,25 +1,41 @@
-# Bootstrap flake.nix — regenerate with: nix run .#write-flake
+# DO-NOT-EDIT. This file was auto-generated using github:vic/flake-file.
+# Use `nix run .#write-flake` to regenerate it.
 {
-  inputs = {
-    flake-file.url = "github:vic/flake-file";
-    flake-parts.url = "github:hercules-ci/flake-parts";
-    import-tree.url = "github:vic/import-tree";
-    den.url = "github:vic/den";
-    selfhostblocks.url = "github:Codys-Wright/selfhostblocks";
-    systems.url = "github:nix-systems/default";
-
-    # Pin nixpkgs to selfhostblocks' version — ensures patches apply cleanly
-    nixpkgs.follows = "selfhostblocks/nixpkgs";
-  };
+  description = "Starcommand - Self-hosting infrastructure";
 
   outputs =
     inputs:
     inputs.flake-parts.lib.mkFlake { inherit inputs; } {
       imports = [
-        inputs.flake-file.flakeModules.default
         (inputs.import-tree ./modules)
         (inputs.import-tree ./hosts)
         (inputs.import-tree ./users)
       ];
     };
+
+  inputs = {
+    den.url = "github:vic/den";
+    deploy-rs.url = "github:serokell/deploy-rs";
+    disko = {
+      inputs.nixpkgs.follows = "nixpkgs";
+      url = "github:nix-community/disko";
+    };
+    flake-aspects.url = "github:vic/flake-aspects";
+    flake-file.url = "github:vic/flake-file";
+    flake-parts = {
+      inputs.nixpkgs-lib.follows = "nixpkgs-lib";
+      url = "github:hercules-ci/flake-parts";
+    };
+    import-tree.url = "github:vic/import-tree";
+    nixos-facter-modules.url = "github:numtide/nixos-facter-modules";
+    nixpkgs = {
+      follows = "selfhostblocks/nixpkgs";
+      url = "https://channels.nixos.org/nixpkgs-unstable/nixexprs.tar.xz";
+    };
+    nixpkgs-lib.follows = "nixpkgs";
+    selfhostblocks.url = "github:Codys-Wright/selfhostblocks";
+    sops-nix.url = "github:Mic92/sops-nix";
+    systems.url = "github:nix-systems/default";
+  };
+
 }
