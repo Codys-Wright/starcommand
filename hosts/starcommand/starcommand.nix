@@ -92,7 +92,7 @@
         # Deployment config — read by modules/flake/deploy-rs.nix
         deployment = {
           enable = true;
-          ip = "192.168.0.102";
+          ip = "192.168.0.106";
           sshPort = 22;
           sshUser = "root";
         };
@@ -156,7 +156,7 @@
           options = [
             "username=soundaddiction"
             "password=C#major7"
-            "vers=1.0"
+            "vers=3.0"
             "uid=0"
             "gid=0"
             "dir_mode=0755"
