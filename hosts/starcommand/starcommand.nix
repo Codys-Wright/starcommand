@@ -156,7 +156,7 @@
           options = [
             "username=soundaddiction"
             "password=C#major7"
-            "vers=3.0"
+            "vers=2.1"
             "uid=0"
             "gid=0"
             "dir_mode=0755"

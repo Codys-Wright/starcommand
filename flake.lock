@@ -2,11 +2,11 @@
   "nodes": {
     "den": {
       "locked": {
-        "lastModified": 1771364340,
-        "narHash": "sha256-i6IoHdOqdJHjJHuTIZqPJVDn6VVOG1nyRXR70qYQej4=",
+        "lastModified": 1772341979,
+        "narHash": "sha256-WIZ/CrEidpEbTgbTsLQFmqf5jjU9dta8gEg8X9LD5+k=",
         "owner": "vic",
         "repo": "den",
-        "rev": "f8cb8c618e1680e99c165d2bf826600170abb5a2",
+        "rev": "fb189d3e83f76c56ee0d7b30752c9017fe4b5462",
         "type": "github"
       },
       "original": {
@@ -88,11 +88,11 @@
     },
     "flake-file": {
       "locked": {
-        "lastModified": 1771017549,
-        "narHash": "sha256-n68HeYEQJ67hMH2LPI0cERD2pkpNe5dyeOGg11uZ7rc=",
+        "lastModified": 1772343585,
+        "narHash": "sha256-7jADySzWscA2822JzNbfRdC+R+B7tzDoWavG8DMY1tU=",
         "owner": "vic",
         "repo": "flake-file",
-        "rev": "9d89918faacdbd2ce26d0aa7298da0fecad8b437",
+        "rev": "0f5c1039860127fa5673d362d68f8b7df29a44bc",
         "type": "github"
       },
       "original": {
@@ -141,11 +141,11 @@
     },
     "import-tree": {
       "locked": {
-        "lastModified": 1771045967,
-        "narHash": "sha256-oYO4poyw0Sb/db2PigqugMlDwsvwLg6CSpFrMUWxA3Q=",
+        "lastModified": 1772344373,
+        "narHash": "sha256-OQQ1MhB9t1J71b2wxRRTdH/Qd8UGG0p+dGspfCf5U1c=",
         "owner": "vic",
         "repo": "import-tree",
-        "rev": "c968d3b54d12cf5d9c13f16f7c545a06c9d1fde6",
+        "rev": "10fda59eee7d7970ec443b925f32a1bc7526648c",
         "type": "github"
       },
       "original": {
