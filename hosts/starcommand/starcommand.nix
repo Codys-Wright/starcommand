@@ -29,7 +29,10 @@
 
   den.aspects = {
     starcommand-host = {
-      includes = [ den.aspects.deployment-base ];
+      includes = [
+        den.aspects.deployment-base
+        <FTS/desktop/xfce>
+      ];
       nixos = {
         config,
         lib,
@@ -181,6 +184,9 @@
           "d /etc/smb-credentials 0750 root root -"
         ];
 
+        # DNS servers (Cloudflare + Google)
+        networking.nameservers = ["1.1.1.1" "8.8.8.8"];
+
         # 10G direct link — static IP + DHCP server for local switch
         networking.interfaces.enp33s0.ipv4.addresses = [
           {
@@ -191,6 +197,7 @@
 
         services.dnsmasq = {
           enable = true;
+          resolveLocalQueries = false; # Don't use dnsmasq for local DNS
           settings = {
             interface = "enp33s0";
             bind-interfaces = true;
