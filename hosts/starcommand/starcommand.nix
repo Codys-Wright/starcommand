@@ -107,6 +107,7 @@
             "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO8y8AMfYQnvu3BvjJ54/qYJcedNkMHmnjexine1ypda cody"
             "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILBJxxU1TXbV1IvGFm67X7jX+C7uRtLcgimcoDGxapNP starcommand-deploy"
             "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBDSw8Dx6n7gfGztnPQxq4Pp58k/n5JGZE/omfrB3yDp starcommand-deploy-mac"
+            "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAKXFzMc1f99McvHjkYYiHyiWGk5pKxXlBy8xT0sp01P THEBATTLESHIP-host"
           ];
         };
 
