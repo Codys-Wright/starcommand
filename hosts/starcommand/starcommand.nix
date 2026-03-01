@@ -75,9 +75,9 @@
                   type = "btrfs";
                   extraArgs = ["-f"];
                   subvolumes = {
-                    "/root" = {mountpoint = "/";};
-                    "/persist" = {mountpoint = "/persist";};
-                    "/nix" = {
+                    "@root" = {mountpoint = "/";};
+                    "@persist" = {mountpoint = "/persist";};
+                    "@nix" = {
                       mountOptions = ["noatime"];
                       mountpoint = "/nix";
                     };

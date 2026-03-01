@@ -98,7 +98,7 @@ in {
         # If hostname specified, decrypt SSH key and add to SSH options
         if [ -n "$HOSTNAME" ]; then
           TEMP_KEY=$(decrypt_ssh_key "$HOSTNAME")
-          trap "rm -f $TEMP_KEY" EXIT
+          trap 'rm -f "$TEMP_KEY"' EXIT
 
           # Add the decrypted key to SSH options via environment
           # deploy-rs will pick this up from the deploy.nodes config
@@ -106,7 +106,7 @@ in {
         fi
 
         # Run deploy-rs with original arguments
-        exec deploy-rs "''${ARGS[@]}"
+        exec deploy "''${ARGS[@]}"
       '';
     };
   in {
