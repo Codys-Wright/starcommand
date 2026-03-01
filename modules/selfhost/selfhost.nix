@@ -94,10 +94,10 @@
               hostname = "git.${domain}"; # Forgejo
               service = "https://localhost";
             }
-            {
-              hostname = "bookmarks.${domain}"; # Karakeep
-              service = "https://localhost";
-            }
+            # {
+            #   hostname = "bookmarks.${domain}"; # Karakeep - disabled
+            #   service = "https://localhost";
+            # }
             {
               hostname = "audiobooks.${domain}"; # Audiobookshelf
               service = "https://localhost";
@@ -508,17 +508,17 @@
           ssoSecretForAutheliaKey = "starcommand/selfhost/auth/authelia/forgejo_sso_secret";
         })
 
-        # Karakeep - AI-powered bookmarking
-        (FTS.selfhost._.karakeep {
-          inherit domain;
-          subdomain = karakeepSubdomain;
-          nextauthSecretKey = "starcommand/selfhost/apps/karakeep/nextauth_secret";
-          meilisearchMasterKeyKey = "starcommand/selfhost/apps/karakeep/meilisearch_master_key";
-          # SSO
-          authEndpoint = "https://${authSubdomain}.${domain}";
-          ssoSecretKey = "starcommand/selfhost/apps/karakeep/sso_secret";
-          ssoSecretForAutheliaKey = "starcommand/selfhost/auth/authelia/karakeep_sso_secret";
-        })
+        # Karakeep - AI-powered bookmarking - disabled due to meilisearch crash
+        # (FTS.selfhost._.karakeep {
+        #   inherit domain;
+        #   subdomain = karakeepSubdomain;
+        #   nextauthSecretKey = "starcommand/selfhost/apps/karakeep/nextauth_secret";
+        #   meilisearchMasterKeyKey = "starcommand/selfhost/apps/karakeep/meilisearch_master_key";
+        #   # SSO
+        #   authEndpoint = "https://${authSubdomain}.${domain}";
+        #   ssoSecretKey = "starcommand/selfhost/apps/karakeep/sso_secret";
+        #   ssoSecretForAutheliaKey = "starcommand/selfhost/auth/authelia/karakeep_sso_secret";
+        # })
 
         # Audiobookshelf - Audiobook server
         (FTS.selfhost._.audiobookshelf {
@@ -785,23 +785,23 @@
           settings.key = "starcommand/selfhost/apps/forgejo/sso_secret";
         };
 
-        # Karakeep secrets
-        shb.sops.secret."starcommand/selfhost/apps/karakeep/nextauth_secret" = {
-          request = config.shb.karakeep.nextauthSecret.request;
-          settings.key = "starcommand/selfhost/apps/karakeep/nextauth_secret";
-        };
-        shb.sops.secret."starcommand/selfhost/apps/karakeep/meilisearch_master_key" = {
-          request = config.shb.karakeep.meilisearchMasterKey.request;
-          settings.key = "starcommand/selfhost/apps/karakeep/meilisearch_master_key";
-        };
-        shb.sops.secret."starcommand/selfhost/apps/karakeep/sso_secret" = {
-          request = config.shb.karakeep.sso.sharedSecret.request;
-          settings.key = "starcommand/selfhost/apps/karakeep/sso_secret";
-        };
-        shb.sops.secret."starcommand/selfhost/auth/authelia/karakeep_sso_secret" = {
-          request = config.shb.karakeep.sso.sharedSecretForAuthelia.request;
-          settings.key = "starcommand/selfhost/apps/karakeep/sso_secret";
-        };
+        # Karakeep secrets - disabled
+        # shb.sops.secret."starcommand/selfhost/apps/karakeep/nextauth_secret" = {
+        #   request = config.shb.karakeep.nextauthSecret.request;
+        #   settings.key = "starcommand/selfhost/apps/karakeep/nextauth_secret";
+        # };
+        # shb.sops.secret."starcommand/selfhost/apps/karakeep/meilisearch_master_key" = {
+        #   request = config.shb.karakeep.meilisearchMasterKey.request;
+        #   settings.key = "starcommand/selfhost/apps/karakeep/meilisearch_master_key";
+        # };
+        # shb.sops.secret."starcommand/selfhost/apps/karakeep/sso_secret" = {
+        #   request = config.shb.karakeep.sso.sharedSecret.request;
+        #   settings.key = "starcommand/selfhost/apps/karakeep/sso_secret";
+        # };
+        # shb.sops.secret."starcommand/selfhost/auth/authelia/karakeep_sso_secret" = {
+        #   request = config.shb.karakeep.sso.sharedSecretForAuthelia.request;
+        #   settings.key = "starcommand/selfhost/apps/karakeep/sso_secret";
+        # };
 
         # Audiobookshelf SSO secrets
         shb.sops.secret."starcommand/selfhost/apps/audiobookshelf/sso_secret" = {
