@@ -1,5 +1,6 @@
 # ProtonVPN Service
 # VPN service using ProtonVPN with OpenVPN
+# Note: Uses selfhostblocks shb.vpn module which has specific options
 {
   FTS,
   inputs,
@@ -16,7 +17,9 @@
       # Required secrets
       usernameKey,
       passwordKey,
-      # Kill switch configuration
+      # Remote server IP
+      remoteServerIP,
+      # Kill switch configuration (shb.vpn only supports enable, allowedSubnets, exemptPorts)
       killswitch ? {
         enable = true;
         allowedSubnets = [
@@ -59,22 +62,26 @@
         let
           # Create auth file from username and password secrets
           authFilePath = "/run/openvpn/protonvpn-auth";
+          # Filter killswitch to only include valid shb.vpn options
+          validKillswitch = {
+            inherit (killswitch) enable;
+          } // lib.optionalAttrs (killswitch ? allowedSubnets) {
+            inherit (killswitch) allowedSubnets;
+          } // lib.optionalAttrs (killswitch ? exemptPorts) {
+            inherit (killswitch) exemptPorts;
+          };
         in
         {
-          # ProtonVPN OpenVPN configuration
+          # ProtonVPN OpenVPN configuration via selfhostblocks
           shb.vpn.protonvpn = {
             enable = true;
-            provider = "protonvpn";
-            inherit dev routingNumber;
-            
+            inherit dev routingNumber remoteServerIP;
+
             # Auth file will be created by systemd ExecStartPre
             authFile = authFilePath;
-            
-            # Kill switch configuration
-            inherit killswitch;
-            
-            # Optional proxy
-            inherit proxyPort;
+
+            # Kill switch configuration (filtered to valid options)
+            killswitch = validKillswitch;
           };
 
           # Create auth file before OpenVPN starts

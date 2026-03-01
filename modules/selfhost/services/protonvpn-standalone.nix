@@ -6,9 +6,9 @@
   ...
 }: {
   FTS.selfhost._.protonvpn-standalone = {
-    # Required parameters
-    usernameFile,
-    passwordFile,
+    # Required parameters - SOPS secret keys
+    usernameKey,
+    passwordKey,
     # Optional parameters
     killswitch ? {
       enable = true;
@@ -22,18 +22,18 @@
     aspect-chain,
   }: {
     description = ''
-      ProtonVPN Standalone - OpenVPN client with kill switch for desktop systems.
+      ProtonVPN Standalone - OpenVPN client with kill switch.
 
       Features:
       - ProtonVPN OpenVPN configuration with 64+ servers
       - Automatic failover across multiple ProtonVPN servers
       - Configurable kill switch to prevent leaks
       - Local network access preservation
-      - Secure credential management
+      - Secure credential management via SOPS
 
        Configuration:
-       - Username file: ${usernameFile}
-       - Password file: ${passwordFile}
+       - Username key: ${usernameKey}
+       - Password key: ${passwordKey}
        - Kill switch: ${
         if killswitch.enable
         then "enabled"
@@ -48,7 +48,10 @@
       lib,
       pkgs,
       ...
-    }: {
+    }: let
+      usernameFile = config.shb.sops.secret.${usernameKey}.result.path;
+      passwordFile = config.shb.sops.secret.${passwordKey}.result.path;
+    in {
       # ProtonVPN OpenVPN configuration
       services.openvpn.servers.protonvpn = {
         config = ''

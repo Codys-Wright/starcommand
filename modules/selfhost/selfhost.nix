@@ -592,12 +592,10 @@
           ssoSecretForAutheliaKey = "starcommand/selfhost/auth/authelia/immich_sso_secret";
         })
 
-        # ProtonVPN - VPN service with kill switch
-        (FTS.selfhost._.protonvpn {
-          inherit domain;
+        # ProtonVPN - VPN service with kill switch (standalone, not using shb.vpn)
+        (FTS.selfhost._.protonvpn-standalone {
           usernameKey = "starcommand/selfhost/openvpn/username";
           passwordKey = "starcommand/selfhost/openvpn/password";
-          remoteServerIP = "149.40.62.62";
           killswitch = {
             enable = true;
             allowedSubnets = [
@@ -869,8 +867,6 @@
           };
         };
 
-        # ProtonVPN remote server IP
-        shb.vpn.protonvpn.remoteServerIP = "149.40.62.62";
       };
     };
   };

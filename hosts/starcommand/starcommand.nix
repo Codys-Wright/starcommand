@@ -29,6 +29,7 @@
 
   den.aspects = {
     starcommand-host = {
+      includes = [ den.aspects.deployment-base ];
       nixos = {
         config,
         lib,
@@ -61,6 +62,9 @@
 
         # Hardware detection via nixos-facter
         facter.reportPath = ./facter.json;
+
+        # Allow unfree packages (open-webui has unfree license)
+        nixpkgs.config.allowUnfree = true;
 
         # Disko disk configuration — btrfs with impermanence
         disko.devices.disk.main = {
