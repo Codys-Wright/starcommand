@@ -41,17 +41,7 @@
           inputs.disko.nixosModules.disko
         ];
 
-        # Deployment options — read by modules/flake/deploy-rs.nix
-        # Must use explicit config = {} since options is declared in the same module
-        options.deployment = {
-          enable = lib.mkEnableOption "deploy-rs deployment" // {default = true;};
-          ip = lib.mkOption {type = lib.types.str; default = ""; description = "IP for deploy-rs";};
-          sshPort = lib.mkOption {type = lib.types.port; default = 22;};
-          sshUser = lib.mkOption {type = lib.types.str; default = "root";};
-        };
-
-        config = {
-
+        # Allow unfree packages (open-webui has unfree license)
         nixpkgs.config.allowUnfree = true;
 
         # SSH access
@@ -62,9 +52,6 @@
 
         # Hardware detection via nixos-facter
         facter.reportPath = ./facter.json;
-
-        # Allow unfree packages (open-webui has unfree license)
-        nixpkgs.config.allowUnfree = true;
 
         # Disko disk configuration — btrfs with impermanence
         disko.devices.disk.main = {
@@ -237,8 +224,6 @@
           lidSwitchDocked = "ignore";
           lidSwitchExternalPower = "ignore";
         };
-
-        }; # end config
       };
     };
   };
