@@ -608,6 +608,9 @@
 
         # Samba Client Tools - SMB/CIFS utilities for network shares
         (FTS.selfhost._.samba-client {})
+
+        # Samba Server - Advertise SMB shares on local network
+        (FTS.selfhost._.samba-server {})
       ];
 
       nixos = {
