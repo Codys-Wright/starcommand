@@ -54,7 +54,8 @@
         facter.reportPath = ./facter.json;
 
         # Disko disk configuration — btrfs with impermanence
-        disko.devices.disk.main = {
+        # Disk name "system" matches existing partlabels (disk-system-ESP, disk-system-root)
+        disko.devices.disk.system = {
           device = "/dev/nvme0n1";
           type = "disk";
           content = {
