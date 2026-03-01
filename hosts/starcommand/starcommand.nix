@@ -149,23 +149,23 @@
           ];
         };
 
-        # SMB mount to Synology NAS "TheVault"
-        fileSystems."/mnt/synology-vault" = {
-          device = "//192.168.0.114/Media";
-          fsType = "cifs";
-          options = [
-            "username=soundaddiction"
-            "password=C#major7"
-            "vers=2.1"
-            "uid=0"
-            "gid=0"
-            "dir_mode=0755"
-            "file_mode=0644"
-            "nofail"
-            "x-systemd.automount"
-            "x-systemd.mount-timeout=10"
-          ];
-        };
+        # SMB mount to Synology NAS "TheVault" - disabled until NAS is online
+        # fileSystems."/mnt/synology-vault" = {
+        #   device = "//192.168.0.114/Media";
+        #   fsType = "cifs";
+        #   options = [
+        #     "username=soundaddiction"
+        #     "password=C#major7"
+        #     "vers=1.0"
+        #     "uid=0"
+        #     "gid=0"
+        #     "dir_mode=0755"
+        #     "file_mode=0644"
+        #     "nofail"
+        #     "x-systemd.automount"
+        #     "x-systemd.mount-timeout=10"
+        #   ];
+        # };
 
         # Service data directories on merged storage
         systemd.tmpfiles.rules = [

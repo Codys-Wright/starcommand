@@ -110,10 +110,10 @@
               hostname = "home.${domain}"; # Home-Assistant
               service = "https://localhost";
             }
-            {
-              hostname = "chat.${domain}"; # Open-WebUI
-              service = "https://localhost";
-            }
+            # {
+            #   hostname = "chat.${domain}"; # Open-WebUI - disabled
+            #   service = "https://localhost";
+            # }
             {
               hostname = "youtube.${domain}"; # Pinchflat
               service = "https://localhost";
@@ -552,15 +552,15 @@
           };
         })
 
-        # Open-WebUI - LLM chat interface
-        (FTS.selfhost._.open-webui {
-          inherit domain;
-          subdomain = openWebuiSubdomain;
-          # SSO
-          authEndpoint = "https://${authSubdomain}.${domain}";
-          ssoSecretKey = "starcommand/selfhost/apps/open-webui/sso_secret";
-          ssoSecretForAutheliaKey = "starcommand/selfhost/auth/authelia/open-webui_sso_secret";
-        })
+        # Open-WebUI - LLM chat interface - disabled due to crash bug
+        # (FTS.selfhost._.open-webui {
+        #   inherit domain;
+        #   subdomain = openWebuiSubdomain;
+        #   # SSO
+        #   authEndpoint = "https://${authSubdomain}.${domain}";
+        #   ssoSecretKey = "starcommand/selfhost/apps/open-webui/sso_secret";
+        #   ssoSecretForAutheliaKey = "starcommand/selfhost/auth/authelia/open-webui_sso_secret";
+        # })
 
         # Pinchflat - YouTube downloader
         # NOTE: Videos saved to /mnt/storage/youtube
@@ -813,15 +813,15 @@
           settings.key = "starcommand/selfhost/apps/audiobookshelf/sso_secret";
         };
 
-        # Open-WebUI SSO secrets
-        shb.sops.secret."starcommand/selfhost/apps/open-webui/sso_secret" = {
-          request = config.shb.open-webui.sso.sharedSecret.request;
-          settings.key = "starcommand/selfhost/apps/open-webui/sso_secret";
-        };
-        shb.sops.secret."starcommand/selfhost/auth/authelia/open-webui_sso_secret" = {
-          request = config.shb.open-webui.sso.sharedSecretForAuthelia.request;
-          settings.key = "starcommand/selfhost/apps/open-webui/sso_secret";
-        };
+        # Open-WebUI SSO secrets - disabled
+        # shb.sops.secret."starcommand/selfhost/apps/open-webui/sso_secret" = {
+        #   request = config.shb.open-webui.sso.sharedSecret.request;
+        #   settings.key = "starcommand/selfhost/apps/open-webui/sso_secret";
+        # };
+        # shb.sops.secret."starcommand/selfhost/auth/authelia/open-webui_sso_secret" = {
+        #   request = config.shb.open-webui.sso.sharedSecretForAuthelia.request;
+        #   settings.key = "starcommand/selfhost/apps/open-webui/sso_secret";
+        # };
 
         # Pinchflat secrets
         shb.sops.secret."starcommand/selfhost/apps/pinchflat/secret_key_base" = {
