@@ -693,38 +693,39 @@
             # External storage mounts — managed here instead of via selfhostblocks
             # to avoid duplicate creation and to scope to admin user only.
             # Uses DB checks to be idempotent across deploys.
-            systemd.services.nextcloud-setup = {
-              path = [ pkgs.jq ];
-              script = lib.mkAfter ''
-                nextcloud-occ app:install files_external || :
-                nextcloud-occ app:enable files_external
+            # nextcloud-setup runs as root, so we can use runuser instead of sudo
+            systemd.services.nextcloud-setup.script = lib.mkAfter ''
+              nextcloud-occ app:install files_external || :
+              nextcloud-occ app:enable files_external
 
-                setup_mount() {
-                  local MOUNT_NAME="$1"
-                  local DIR="$2"
+              # External storage mounts are managed via direct DB queries because
+              # nextcloud-occ files_external:list returns empty for admin mounts.
+              # This ensures idempotent creation and user scoping.
+              setup_mount() {
+                local MOUNT_NAME="$1"
+                local DIR="$2"
+                local PSQL="${pkgs.util-linux}/bin/runuser -u postgres -- ${config.services.postgresql.package}/bin/psql -d nextcloud -t -A"
 
-                  # Check if mount already exists via occ (returns [] if empty)
-                  MOUNT_ID=$(nextcloud-occ files_external:list --output=json 2>/dev/null \
-                    | jq -r ".[] | select(.mount_point == \"/$MOUNT_NAME\" and .configuration.datadir == \"$DIR\") | .mount_id" \
-                    | head -1)
+                MOUNT_ID=$($PSQL -c "SELECT m.mount_id FROM oc_external_mounts m JOIN oc_external_config c ON m.mount_id = c.mount_id WHERE m.mount_point = '/$MOUNT_NAME' AND c.value = '$DIR' LIMIT 1;" | tr -d '[:space:]')
 
-                  if [ -z "$MOUNT_ID" ]; then
-                    echo "Creating external storage mount /$MOUNT_NAME -> $DIR"
-                    MOUNT_ID=$(nextcloud-occ files_external:create "$MOUNT_NAME" local null::null --config datadir="$DIR" | grep -oP '\d+')
-                  fi
+                if [ -z "$MOUNT_ID" ]; then
+                  echo "Creating external storage mount /$MOUNT_NAME -> $DIR"
+                  $PSQL -c "INSERT INTO oc_external_mounts (mount_point, storage_backend, auth_backend, priority, type) VALUES ('/$MOUNT_NAME', 'local', 'null::null', 100, 1) RETURNING mount_id;" | read MOUNT_ID
+                  MOUNT_ID=$(echo "$MOUNT_ID" | tr -d '[:space:]')
+                  $PSQL -c "INSERT INTO oc_external_config (mount_id, key, value) VALUES ($MOUNT_ID, 'datadir', '$DIR');"
+                fi
 
-                  if [ -n "$MOUNT_ID" ]; then
-                    nextcloud-occ files_external:applicable --remove-all "$MOUNT_ID" 2>/dev/null || true
-                    nextcloud-occ files_external:applicable --add-user codywright "$MOUNT_ID"
-                    echo "Mount /$MOUNT_NAME (ID $MOUNT_ID) scoped to codywright only"
-                  fi
-                }
+                if [ -n "$MOUNT_ID" ]; then
+                  $PSQL -c "DELETE FROM oc_external_applicable WHERE mount_id = $MOUNT_ID;"
+                  $PSQL -c "INSERT INTO oc_external_applicable (mount_id, type, value) VALUES ($MOUNT_ID, 3, 'codywright');"
+                  echo "Mount /$MOUNT_NAME (ID $MOUNT_ID) scoped to codywright only"
+                fi
+              }
 
-                setup_mount "storage" "/mnt/storage"
-                setup_mount "files" "/mnt/storage/nextcloud-data/\$user"
-                setup_mount "synology-media" "/mnt/synology-vault"
-              '';
-            };
+              setup_mount "storage" "/mnt/storage"
+              setup_mount "files" "/mnt/storage/nextcloud-data/\$user"
+              setup_mount "synology-media" "/mnt/synology-vault"
+            '';
 
             # Nextcloud sharing alias: cloud.fasttrackaudio.com → same Nextcloud instance
             services.nextcloud.config.extraTrustedDomains = [ "cloud.${sharingDomain}" ];
