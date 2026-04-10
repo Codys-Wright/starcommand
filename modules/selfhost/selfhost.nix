@@ -434,11 +434,8 @@
             dataDir = "/var/lib/nextcloud";
             adminPasswordKey = "starcommand/selfhost/apps/nextcloud/admin_password";
 
-            # External Storage - enable app only; mounts are managed below
+            # External Storage mounts are managed in the nixos block below
             # to avoid selfhostblocks creating duplicates on every deploy
-            externalStorage = {
-              # No userLocalMount or localMounts — we manage them ourselves
-            };
 
             # LDAP integration
             ldap = {
@@ -699,6 +696,9 @@
             # to avoid duplicate creation and to scope to storage_user group.
             # Uses DB checks to be idempotent across deploys.
             systemd.services.nextcloud-setup.script = lib.mkAfter ''
+              nextcloud-occ app:install files_external || :
+              nextcloud-occ app:enable files_external
+
               setup_mount() {
                 local MOUNT_NAME="$1"
                 local DIR="$2"
