@@ -34,6 +34,8 @@
     starcommand-host = {
       includes = [
         den.aspects.deployment-base
+        <FTS/base-host>
+        <FTS/hostname>
         <FTS/desktop/xfce>
       ];
       nixos =
@@ -130,50 +132,51 @@
           };
           boot.loader.efi.canTouchEfiVariables = false;
 
-          # MergerFS, NTFS, and SMB packages
+          # SMB packages
           environment.systemPackages = with pkgs; [
-            mergerfs
-            ntfs3g
             cifs-utils
+            snapraid
           ];
 
-          # Data drives (NTFS via ntfs-3g)
-          fileSystems."/mnt/disks/archive" = {
-            device = "/dev/disk/by-uuid/36C0F5ACC0F5730B";
-            fsType = "ntfs-3g";
-            options = [
-              "rw"
-              "uid=0"
-              "gid=0"
-              "dmask=000"
-              "fmask=000"
-              "nofail"
-            ];
-          };
-          fileSystems."/mnt/disks/collection" = {
-            device = "/dev/disk/by-uuid/02A01CC8A01CC3D7";
-            fsType = "ntfs-3g";
-            options = [
-              "rw"
-              "uid=0"
-              "gid=0"
-              "dmask=000"
-              "fmask=000"
-              "nofail"
-            ];
+          # Data drive (XFS)
+          fileSystems."/mnt/storage" = {
+            device = "/dev/disk/by-label/DATA";
+            fsType = "xfs";
+            options = [ "nofail" ];
           };
 
-          # MergerFS mount combining all disks
-          fileSystems."/mnt/storage" = {
-            device = "/mnt/disks/archive:/mnt/disks/collection";
-            fsType = "fuse.mergerfs";
-            options = [
-              "cache.files=partial"
-              "dropcacheonclose=true"
-              "category.create=mfs"
-              "allow_other"
-              "nofail"
+          # Parity drive (XFS) — used by SnapRAID
+          fileSystems."/mnt/disks/parity" = {
+            device = "/dev/disk/by-label/PARITY";
+            fsType = "xfs";
+            options = [ "nofail" ];
+          };
+
+          # SnapRAID parity for /mnt/storage
+          services.snapraid = {
+            enable = true;
+            dataDisks = {
+              d1 = "/mnt/storage";
+            };
+            parityFiles = [
+              "/mnt/disks/parity/snapraid.parity"
             ];
+            contentFiles = [
+              "/var/lib/snapraid/snapraid.content"
+              "/mnt/storage/.snapraid.content"
+            ];
+            exclude = [
+              "*.unrecoverable"
+              "/tmp/"
+              "/lost+found/"
+              "/.snapraid.content"
+            ];
+            sync.interval = "01:00";
+            scrub = {
+              interval = "Mon *-*-* 02:00:00";
+              plan = 8;
+              olderThan = 10;
+            };
           };
 
           # SMB mount to Synology NAS "TheVault" - disabled until NAS is online
@@ -239,7 +242,7 @@
           services.nfs.server = {
             enable = true;
             exports = ''
-              /mnt/storage  10.10.10.0/24(rw,sync,no_subtree_check,no_root_squash,fsid=0)
+              /mnt/storage  10.10.10.0/24(rw,sync,no_subtree_check,all_squash,anonuid=0,anongid=0,fsid=0)
             '';
           };
           networking.firewall.interfaces.enp33s0.allowedTCPPorts = [ 2049 ];
@@ -257,15 +260,6 @@
             "net.ipv4.tcp_wmem" = "4096 1048576 16777216";
             "net.core.netdev_max_backlog" = 5000;
           };
-
-          # Automatic cleanup
-          nix.gc = {
-            automatic = true;
-            dates = "weekly";
-            options = "--delete-older-than 7d";
-          };
-
-          programs.nh.enable = true;
 
           # Disable all sleep/suspend/hibernate
           systemd.sleep.extraConfig = ''

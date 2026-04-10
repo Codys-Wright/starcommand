@@ -22,6 +22,7 @@
     # Optional parameters
     ssl ? null,
     sslCertName ? domain, # Use domain as cert name (e.g., "starcommand.live")
+    accessControl ? { },
     ...
   } @ args: {
     class,
@@ -57,6 +58,7 @@
         enable = true;
         inherit domain subdomain ldapPort ldapHostname dcdomain;
         ssl = sslCert;
+        rules = accessControl.rules or [ ];
 
         # Debug logging disabled - mitmdump has broken systemd-python dependency
         # TODO: Enable once selfhostblocks fixes the mitmdump service

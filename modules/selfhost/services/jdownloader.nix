@@ -99,10 +99,10 @@
               + lib.optionalString (authEndpoint != null) ''
                 # Authelia SSO
                 auth_request /authelia;
-                auth_request_set $target_url $scheme://$http_host$request_uri;
+                auth_request_set $redirect $scheme://$http_host$request_uri;
                 auth_request_set $user $upstream_http_remote_user;
                 auth_request_set $groups $upstream_http_remote_groups;
-                error_page 401 =302 ${authEndpoint}/?rd=$target_url;
+                error_page 401 403 =302 ${authEndpoint}?rd=$redirect;
               '';
             };
 

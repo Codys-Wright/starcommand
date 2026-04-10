@@ -33,6 +33,7 @@
       }@aspectArgs:
       let
         domain = "starcommand.live";
+        sharingDomain = "fasttrackaudio.com";
         nextcloudSubdomain = "cloud";
         lldapSubdomain = "ldap";
         authSubdomain = "auth";
@@ -69,6 +70,13 @@
             cloudflareTokenKey = "starcommand/selfhost/proxy/cloudflare/zone_dns_key";
           })
 
+          # Let's Encrypt certificate for fasttrackaudio.com (Nextcloud alias domain)
+          (FTS.selfhost._.letsencrypt-certs {
+            domain = sharingDomain;
+            adminEmail = "admin@${domain}";
+            cloudflareTokenKey = "starcommand/selfhost/proxy/cloudflare/zone_dns_key";
+          })
+
           # Cloudflare Tunnel - Exposes services without port forwarding
           (FTS.selfhost._.cloudflare-tunnel {
             inherit domain;
@@ -82,6 +90,10 @@
             manualIngress = [
               {
                 hostname = "cloud.${domain}"; # Nextcloud
+                service = "https://localhost";
+              }
+              {
+                hostname = "cloud.${sharingDomain}"; # Nextcloud sharing alias
                 service = "https://localhost";
               }
               {
@@ -278,6 +290,26 @@
                 ];
                 passwordKey = "starcommand/selfhost/users/bri_zacharias/password";
                 passwordSopsFile = ../../users/cody/secrets.yaml;
+              };
+
+              carterwhitlock = {
+                email = "carterwhitlock@outlook.com";
+                firstName = "Carter";
+                lastName = "Whitlock";
+                groups = [
+                  "nextcloud_user"
+                ];
+                passwordKey = "starcommand/selfhost/users/carter_whitlock/password";
+              };
+
+              tombrooks = {
+                email = "Tom@tombrooksmusic.com";
+                firstName = "Tom";
+                lastName = "Brooks";
+                groups = [
+                  "nextcloud_user"
+                ];
+                passwordKey = "starcommand/selfhost/users/tom_brooks/password";
               };
             };
           })
@@ -665,6 +697,24 @@
             shb.nginx.accessLog = lib.mkDefault true;
             shb.nginx.debugLog = lib.mkDefault false;
 
+            # Nextcloud sharing alias: cloud.fasttrackaudio.com → same Nextcloud instance
+            services.nextcloud.config.extraTrustedDomains = [ "cloud.${sharingDomain}" ];
+
+            # Nginx virtualHost for the sharing domain — mirrors the Nextcloud vhost
+            services.nginx.virtualHosts."cloud.${sharingDomain}" = {
+              forceSSL = true;
+              sslCertificate = config.shb.certs.certs.letsencrypt.${sharingDomain}.paths.cert;
+              sslCertificateKey = config.shb.certs.certs.letsencrypt.${sharingDomain}.paths.key;
+              # Forward everything to the main Nextcloud vhost
+              locations."/".extraConfig = ''
+                proxy_pass https://127.0.0.1;
+                proxy_set_header Host cloud.${sharingDomain};
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+              '';
+            };
+
             # Local DNS for services to reach each other via their public hostnames
             # This allows Forgejo, etc. to reach Authelia locally instead of going through Cloudflare
             networking.hosts."127.0.0.1" = [
@@ -696,6 +746,16 @@
             shb.sops.secret."starcommand/selfhost/users/bri_zacharias/password" = {
               request = config.shb.lldap.ensureUsers.brizacharias.password.request;
               settings.key = "starcommand/selfhost/users/bri_zacharias/password";
+            };
+
+            shb.sops.secret."starcommand/selfhost/users/carter_whitlock/password" = {
+              request = config.shb.lldap.ensureUsers.carterwhitlock.password.request;
+              settings.key = "starcommand/selfhost/users/carter_whitlock/password";
+            };
+
+            shb.sops.secret."starcommand/selfhost/users/tom_brooks/password" = {
+              request = config.shb.lldap.ensureUsers.tombrooks.password.request;
+              settings.key = "starcommand/selfhost/users/tom_brooks/password";
             };
 
             # Secret sharing configuration
