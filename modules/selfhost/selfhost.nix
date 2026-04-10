@@ -693,21 +693,9 @@
               age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
             };
 
-            # Ensure Nextcloud setup waits for PostgreSQL to be fully ready
-            # During deploy activation, postgresql is stopped then started, and
-            # nextcloud-setup's pre-start (occ maintenance:mode --off) can fire
-            # before PostgreSQL is actually accepting connections.
-            systemd.services.nextcloud-setup.preStart = lib.mkBefore ''
-              echo "Waiting for PostgreSQL to accept connections..."
-              for i in $(seq 1 30); do
-                if ${config.services.postgresql.package}/bin/pg_isready -h /run/postgresql -q 2>/dev/null; then
-                  echo "PostgreSQL is ready"
-                  break
-                fi
-                echo "Attempt $i: PostgreSQL not ready, waiting..."
-                sleep 1
-              done
-            '';
+
+            # PostgreSQL 17 — matches the existing data directory on the server
+            services.postgresql.package = pkgs.postgresql_17;
 
             # Nginx reverse proxy
             shb.nginx.accessLog = lib.mkDefault true;
