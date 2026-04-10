@@ -700,7 +700,7 @@
             systemd.services.nextcloud-setup.preStart = lib.mkBefore ''
               echo "Waiting for PostgreSQL to accept connections..."
               for i in $(seq 1 30); do
-                if ${pkgs.sudo}/bin/sudo -u postgres ${config.services.postgresql.package}/bin/pg_isready -q; then
+                if ${config.services.postgresql.package}/bin/pg_isready -h /run/postgresql -q 2>/dev/null; then
                   echo "PostgreSQL is ready"
                   break
                 fi
