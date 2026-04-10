@@ -693,6 +693,13 @@
               age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
             };
 
+            # Ensure Nextcloud setup waits for PostgreSQL to be fully ready
+            # Fixes race condition where nextcloud-setup runs before DB is accepting connections
+            systemd.services.nextcloud-setup = {
+              after = [ "postgresql.service" ];
+              requires = [ "postgresql.service" ];
+            };
+
             # Nginx reverse proxy
             shb.nginx.accessLog = lib.mkDefault true;
             shb.nginx.debugLog = lib.mkDefault false;
