@@ -434,18 +434,10 @@
             dataDir = "/var/lib/nextcloud";
             adminPasswordKey = "starcommand/selfhost/apps/nextcloud/admin_password";
 
-            # External Storage - merged storage and Synology NAS
+            # External Storage - enable app only; mounts are managed below
+            # to avoid selfhostblocks creating duplicates on every deploy
             externalStorage = {
-              userLocalMount = {
-                directory = "/mnt/storage";
-                mountName = "storage"; # Appears as "storage" folder in Nextcloud
-              };
-              localMounts = {
-                synologyMedia = {
-                  directory = "/mnt/synology-vault";
-                  mountName = "synology-media"; # Appears as "synology-media" folder in Nextcloud
-                };
-              };
+              # No userLocalMount or localMounts — we manage them ourselves
             };
 
             # LDAP integration
@@ -703,17 +695,35 @@
             shb.nginx.accessLog = lib.mkDefault true;
             shb.nginx.debugLog = lib.mkDefault false;
 
-            # Restrict external storage mounts to storage_user group
-            # selfhostblocks creates the mount for all users; this scopes it after setup
+            # External storage mounts — managed here instead of via selfhostblocks
+            # to avoid duplicate creation and to scope to storage_user group.
+            # Uses DB checks to be idempotent across deploys.
             systemd.services.nextcloud-setup.script = lib.mkAfter ''
-              # Get the mount ID for "storage" external storage
-              MOUNT_ID=$(nextcloud-occ files_external:list --output=json | ${pkgs.jq}/bin/jq -r '.[] | select(.mount_point == "storage") | .mount_id')
-              if [ -n "$MOUNT_ID" ]; then
-                # Remove all-users access and restrict to storage_user group
-                nextcloud-occ files_external:applicable --remove-all "$MOUNT_ID" || true
-                nextcloud-occ files_external:applicable --add-group storage_user "$MOUNT_ID"
-                echo "External storage mount $MOUNT_ID restricted to storage_user group"
-              fi
+              setup_mount() {
+                local MOUNT_NAME="$1"
+                local DIR="$2"
+                local JQ="${pkgs.jq}/bin/jq"
+
+                # Check if mount already exists (query DB via occ)
+                MOUNT_ID=$(sudo -u postgres ${config.services.postgresql.package}/bin/psql -d nextcloud -t -A \
+                  -c "SELECT m.mount_id FROM oc_external_mounts m JOIN oc_external_config c ON m.mount_id = c.mount_id WHERE m.mount_point = '/$MOUNT_NAME' AND c.value = '$DIR' LIMIT 1;")
+
+                if [ -z "$MOUNT_ID" ]; then
+                  echo "Creating external storage mount /$MOUNT_NAME -> $DIR"
+                  MOUNT_ID=$(nextcloud-occ files_external:create "$MOUNT_NAME" local null::null --config datadir="$DIR" | grep -oP '\d+')
+                fi
+
+                if [ -n "$MOUNT_ID" ]; then
+                  # Ensure scoped to storage_user group (idempotent)
+                  nextcloud-occ files_external:applicable --remove-all "$MOUNT_ID" 2>/dev/null || true
+                  nextcloud-occ files_external:applicable --add-group storage_user "$MOUNT_ID"
+                  echo "Mount /$MOUNT_NAME (ID $MOUNT_ID) scoped to storage_user group"
+                fi
+              }
+
+              setup_mount "storage" "/mnt/storage"
+              setup_mount "files" "/mnt/storage/nextcloud-data/\$user"
+              setup_mount "synology-media" "/mnt/synology-vault"
             '';
 
             # Nextcloud sharing alias: cloud.fasttrackaudio.com → same Nextcloud instance
