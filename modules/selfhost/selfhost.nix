@@ -730,20 +730,9 @@
             # Nextcloud sharing alias: cloud.fasttrackaudio.com → same Nextcloud instance
             services.nextcloud.config.extraTrustedDomains = [ "cloud.${sharingDomain}" ];
 
-            # Nginx virtualHost for the sharing domain — mirrors the Nextcloud vhost
-            services.nginx.virtualHosts."cloud.${sharingDomain}" = {
-              forceSSL = true;
-              sslCertificate = config.shb.certs.certs.letsencrypt.${sharingDomain}.paths.cert;
-              sslCertificateKey = config.shb.certs.certs.letsencrypt.${sharingDomain}.paths.key;
-              # Forward everything to the main Nextcloud vhost
-              locations."/".extraConfig = ''
-                proxy_pass https://127.0.0.1;
-                proxy_set_header Host cloud.${sharingDomain};
-                proxy_set_header X-Real-IP $remote_addr;
-                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-                proxy_set_header X-Forwarded-Proto $scheme;
-              '';
-            };
+            # Add fasttrackaudio.com as a server alias on the Nextcloud vhost
+            # so nginx serves Nextcloud directly on both domains (no proxy loop)
+            services.nginx.virtualHosts."cloud.${domain}".serverAliases = [ "cloud.${sharingDomain}" ];
 
             # Local DNS for services to reach each other via their public hostnames
             # This allows Forgejo, etc. to reach Authelia locally instead of going through Cloudflare
