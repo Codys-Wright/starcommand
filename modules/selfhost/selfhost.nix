@@ -214,7 +214,6 @@
               grocy_user = { };
               deluge_user = { };
               jdownloader_user = { };
-              storage_user = { };
             };
 
             # Define users
@@ -249,7 +248,6 @@
                   "immich_user"
                   "immich_admin"
                   "jdownloader_user"
-                  "storage_user"
                 ];
                 passwordKey = "cody/personal/password";
                 passwordSopsFile = ../../users/cody/secrets.yaml;
@@ -693,7 +691,7 @@
             shb.nginx.debugLog = lib.mkDefault false;
 
             # External storage mounts — managed here instead of via selfhostblocks
-            # to avoid duplicate creation and to scope to storage_user group.
+            # to avoid duplicate creation and to scope to nextcloud_admin group.
             # Uses DB checks to be idempotent across deploys.
             systemd.services.nextcloud-setup = {
               path = [ pkgs.jq ];
@@ -717,8 +715,8 @@
 
                   if [ -n "$MOUNT_ID" ]; then
                     nextcloud-occ files_external:applicable --remove-all "$MOUNT_ID" 2>/dev/null || true
-                    nextcloud-occ files_external:applicable --add-group storage_user "$MOUNT_ID"
-                    echo "Mount /$MOUNT_NAME (ID $MOUNT_ID) scoped to storage_user group"
+                    nextcloud-occ files_external:applicable --add-group nextcloud_admin "$MOUNT_ID"
+                    echo "Mount /$MOUNT_NAME (ID $MOUNT_ID) scoped to nextcloud_admin group"
                   fi
                 }
 
