@@ -278,11 +278,11 @@
         "nmdsrc": "nmdsrc"
       },
       "locked": {
-        "lastModified": 1766725848,
-        "narHash": "sha256-XIgsYhZ+yM4Wr23iWEr3TGggimes6Grt0yooMMZdf5M=",
+        "lastModified": 1775798622,
+        "narHash": "sha256-8LeUwt24TtdOzcODAo+gYoYe+tI80FFYubeyEvbtJdI=",
         "owner": "Codys-Wright",
         "repo": "selfhostblocks",
-        "rev": "3d87c590542dd678ac8a604e60d5402f9dd561e1",
+        "rev": "bb0d890ef2bc6d37579e2935d0c965a5c9ed53a3",
         "type": "github"
       },
       "original": {
