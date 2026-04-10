@@ -214,6 +214,7 @@
               grocy_user = { };
               deluge_user = { };
               jdownloader_user = { };
+              storage_user = { };
             };
 
             # Define users
@@ -248,6 +249,7 @@
                   "immich_user"
                   "immich_admin"
                   "jdownloader_user"
+                  "storage_user"
                 ];
                 passwordKey = "cody/personal/password";
                 passwordSopsFile = ../../users/cody/secrets.yaml;
@@ -700,6 +702,19 @@
             # Nginx reverse proxy
             shb.nginx.accessLog = lib.mkDefault true;
             shb.nginx.debugLog = lib.mkDefault false;
+
+            # Restrict external storage mounts to storage_user group
+            # selfhostblocks creates the mount for all users; this scopes it after setup
+            systemd.services.nextcloud-setup.script = lib.mkAfter ''
+              # Get the mount ID for "storage" external storage
+              MOUNT_ID=$(nextcloud-occ files_external:list --output=json | ${pkgs.jq}/bin/jq -r '.[] | select(.mount_point == "storage") | .mount_id')
+              if [ -n "$MOUNT_ID" ]; then
+                # Remove all-users access and restrict to storage_user group
+                nextcloud-occ files_external:applicable --remove-all "$MOUNT_ID" || true
+                nextcloud-occ files_external:applicable --add-group storage_user "$MOUNT_ID"
+                echo "External storage mount $MOUNT_ID restricted to storage_user group"
+              fi
+            '';
 
             # Nextcloud sharing alias: cloud.fasttrackaudio.com → same Nextcloud instance
             services.nextcloud.config.extraTrustedDomains = [ "cloud.${sharingDomain}" ];
