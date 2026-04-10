@@ -695,36 +695,38 @@
             # External storage mounts — managed here instead of via selfhostblocks
             # to avoid duplicate creation and to scope to storage_user group.
             # Uses DB checks to be idempotent across deploys.
-            systemd.services.nextcloud-setup.script = lib.mkAfter ''
-              nextcloud-occ app:install files_external || :
-              nextcloud-occ app:enable files_external
+            systemd.services.nextcloud-setup = {
+              path = [ pkgs.jq ];
+              script = lib.mkAfter ''
+                nextcloud-occ app:install files_external || :
+                nextcloud-occ app:enable files_external
 
-              setup_mount() {
-                local MOUNT_NAME="$1"
-                local DIR="$2"
-                local JQ="${pkgs.jq}/bin/jq"
+                setup_mount() {
+                  local MOUNT_NAME="$1"
+                  local DIR="$2"
 
-                # Check if mount already exists (query DB via occ)
-                MOUNT_ID=$(sudo -u postgres ${config.services.postgresql.package}/bin/psql -d nextcloud -t -A \
-                  -c "SELECT m.mount_id FROM oc_external_mounts m JOIN oc_external_config c ON m.mount_id = c.mount_id WHERE m.mount_point = '/$MOUNT_NAME' AND c.value = '$DIR' LIMIT 1;")
+                  # Check if mount already exists via occ (returns [] if empty)
+                  MOUNT_ID=$(nextcloud-occ files_external:list --output=json 2>/dev/null \
+                    | jq -r ".[] | select(.mount_point == \"/$MOUNT_NAME\" and .configuration.datadir == \"$DIR\") | .mount_id" \
+                    | head -1)
 
-                if [ -z "$MOUNT_ID" ]; then
-                  echo "Creating external storage mount /$MOUNT_NAME -> $DIR"
-                  MOUNT_ID=$(nextcloud-occ files_external:create "$MOUNT_NAME" local null::null --config datadir="$DIR" | grep -oP '\d+')
-                fi
+                  if [ -z "$MOUNT_ID" ]; then
+                    echo "Creating external storage mount /$MOUNT_NAME -> $DIR"
+                    MOUNT_ID=$(nextcloud-occ files_external:create "$MOUNT_NAME" local null::null --config datadir="$DIR" | grep -oP '\d+')
+                  fi
 
-                if [ -n "$MOUNT_ID" ]; then
-                  # Ensure scoped to storage_user group (idempotent)
-                  nextcloud-occ files_external:applicable --remove-all "$MOUNT_ID" 2>/dev/null || true
-                  nextcloud-occ files_external:applicable --add-group storage_user "$MOUNT_ID"
-                  echo "Mount /$MOUNT_NAME (ID $MOUNT_ID) scoped to storage_user group"
-                fi
-              }
+                  if [ -n "$MOUNT_ID" ]; then
+                    nextcloud-occ files_external:applicable --remove-all "$MOUNT_ID" 2>/dev/null || true
+                    nextcloud-occ files_external:applicable --add-group storage_user "$MOUNT_ID"
+                    echo "Mount /$MOUNT_NAME (ID $MOUNT_ID) scoped to storage_user group"
+                  fi
+                }
 
-              setup_mount "storage" "/mnt/storage"
-              setup_mount "files" "/mnt/storage/nextcloud-data/\$user"
-              setup_mount "synology-media" "/mnt/synology-vault"
-            '';
+                setup_mount "storage" "/mnt/storage"
+                setup_mount "files" "/mnt/storage/nextcloud-data/\$user"
+                setup_mount "synology-media" "/mnt/synology-vault"
+              '';
+            };
 
             # Nextcloud sharing alias: cloud.fasttrackaudio.com → same Nextcloud instance
             services.nextcloud.config.extraTrustedDomains = [ "cloud.${sharingDomain}" ];
