@@ -704,7 +704,7 @@
               setup_mount() {
                 local MOUNT_NAME="$1"
                 local DIR="$2"
-                local PSQL="${pkgs.util-linux}/bin/runuser -u postgres -- ${config.services.postgresql.package}/bin/psql -d nextcloud -t -A"
+                local PSQL="${config.services.postgresql.package}/bin/psql -d nextcloud -t -A"
 
                 MOUNT_ID=$($PSQL -c "SELECT m.mount_id FROM oc_external_mounts m JOIN oc_external_config c ON m.mount_id = c.mount_id WHERE m.mount_point = '/$MOUNT_NAME' AND c.value = '$DIR' LIMIT 1;" | tr -d '[:space:]')
 
