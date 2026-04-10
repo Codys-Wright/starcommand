@@ -694,11 +694,20 @@
             };
 
             # Ensure Nextcloud setup waits for PostgreSQL to be fully ready
-            # Fixes race condition where nextcloud-setup runs before DB is accepting connections
-            systemd.services.nextcloud-setup = {
-              after = [ "postgresql.service" ];
-              requires = [ "postgresql.service" ];
-            };
+            # During deploy activation, postgresql is stopped then started, and
+            # nextcloud-setup's pre-start (occ maintenance:mode --off) can fire
+            # before PostgreSQL is actually accepting connections.
+            systemd.services.nextcloud-setup.preStart = lib.mkBefore ''
+              echo "Waiting for PostgreSQL to accept connections..."
+              for i in $(seq 1 30); do
+                if ${pkgs.sudo}/bin/sudo -u postgres ${config.services.postgresql.package}/bin/pg_isready -q; then
+                  echo "PostgreSQL is ready"
+                  break
+                fi
+                echo "Attempt $i: PostgreSQL not ready, waiting..."
+                sleep 1
+              done
+            '';
 
             # Nginx reverse proxy
             shb.nginx.accessLog = lib.mkDefault true;
