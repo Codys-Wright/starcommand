@@ -691,7 +691,7 @@
             shb.nginx.debugLog = lib.mkDefault false;
 
             # External storage mounts — managed here instead of via selfhostblocks
-            # to avoid duplicate creation and to scope to nextcloud_admin group.
+            # to avoid duplicate creation and to scope to admin user only.
             # Uses DB checks to be idempotent across deploys.
             systemd.services.nextcloud-setup = {
               path = [ pkgs.jq ];
@@ -715,8 +715,8 @@
 
                   if [ -n "$MOUNT_ID" ]; then
                     nextcloud-occ files_external:applicable --remove-all "$MOUNT_ID" 2>/dev/null || true
-                    nextcloud-occ files_external:applicable --add-group nextcloud_admin "$MOUNT_ID"
-                    echo "Mount /$MOUNT_NAME (ID $MOUNT_ID) scoped to nextcloud_admin group"
+                    nextcloud-occ files_external:applicable --add-user codywright "$MOUNT_ID"
+                    echo "Mount /$MOUNT_NAME (ID $MOUNT_ID) scoped to codywright only"
                   fi
                 }
 
